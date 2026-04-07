@@ -19,6 +19,9 @@ gateway:
   public-paths:
     - /api/v1/auth/login
     - /api/v1/auth/register
+  routes:
+    users-uri: http://localhost:8081
+    orders-uri: http://localhost:8082
 
 management:
   endpoints:
