@@ -86,10 +86,6 @@ class GatewayIntegrationTest {
     @Autowired
     WebTestClient webTestClient;
 
-    // -------------------------------------------------------------------------
-    // JWT filter tests
-    // -------------------------------------------------------------------------
-
     @Test
     void jwtFilter_returns401_whenAuthorizationHeaderIsMissing() {
         webTestClient.get()
@@ -121,9 +117,6 @@ class GatewayIntegrationTest {
                 .expectStatus().value(status -> assertThat(status).isNotEqualTo(401));
     }
 
-    // -------------------------------------------------------------------------
-    // Rate-limiter test
-    // -------------------------------------------------------------------------
 
     @Test
     void rateLimiter_allows100AndRejects5_outOf105ConcurrentRequests() {
@@ -160,7 +153,6 @@ class GatewayIntegrationTest {
                 .isEqualTo(5);
     }
 
-    // -------------------------------------------------------------------------
 
     private String mintJwt(String subject) {
         SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(JWT_SECRET));
