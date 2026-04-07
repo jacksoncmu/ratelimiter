@@ -41,5 +41,48 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
         return -1;
     }
 
-    
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        String userId = exchange.getRequest().getHeaders().getFirst(X_USER_ID_HEADER);
+
+        if (userId == null) {
+            // Public route — JWT filter did not authenticate, skip rate limiting
+            return chain.filter(exchange);
+        }
+
+        String key = KEY_PREFIX + userId;
+
+        return redisTemplate.execute(
+                        rateLimitScript,
+                        List.of(key),
+                        String.valueOf(CAPACITY),
+                        String.valueOf(REFILL_RATE),
+                        String.valueOf(System.currentTimeMillis())
+                )
+                .next()
+                .flatMap(result -> {
+                    String[] parts = result.split(":");
+                    boolean allowed = "1".equals(parts[0]);
+                    String remaining = parts[1];
+
+                    if (allowed) {
+                        exchange.getResponse().getHeaders().set(X_RATE_LIMIT_REMAINING, remaining);
+                        return chain.filter(exchange);
+                    }
+
+                    return writeRateLimitExceeded(exchange);
+                });
+    }
+
+    private Mono<Void> writeRateLimitExceeded(ServerWebExchange exchange) {
+        byte[] body = "{\"error\":\"Too Many Requests\",\"message\":\"Rate limit exceeded. Please retry later.\"}"
+                .getBytes(StandardCharsets.UTF_8);
+
+        exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
+        exchange.getResponse().getHeaders().set(X_RATE_LIMIT_REMAINING, "0");
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(body);
+        return exchange.getResponse().writeWith(Mono.just(buffer));
+    }
 }
