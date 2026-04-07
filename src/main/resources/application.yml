@@ -20,6 +20,24 @@ gateway:
     - /api/v1/auth/login
     - /api/v1/auth/register
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        spring.cloud.gateway.requests: true
+
 logging:
   level:
     com.example.gateway: DEBUG
