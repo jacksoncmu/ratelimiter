@@ -16,9 +16,7 @@ gateway:
     # HS256 key — must be Base64-encoded and at least 256 bits (32 bytes).
     # Generate one with: openssl rand -base64 32
     secret: "bXlTdXBlclNlY3JldEtleUZvckpXVEF1dGhUaGlzSXNBVGVzdA=="
-  public-paths:
-    - /api/v1/auth/login
-    - /api/v1/auth/register
+  public-paths: /api/v1/auth/login,/api/v1/auth/register
   routes:
     users-uri: http://localhost:8081
     orders-uri: http://localhost:8082
