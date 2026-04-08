@@ -18,9 +18,11 @@ public class RouteConfig {
         return builder.routes()
                 .route("users-service", r -> r
                         .path("/api/v1/users/**")
+                        .filters(f -> f.stripPrefix(3))
                         .uri(usersUri))
                 .route("orders-service", r -> r
                         .path("/api/v1/orders/**")
+                        .filters(f -> f.stripPrefix(3))
                         .uri(ordersUri))
                 .build();
     }

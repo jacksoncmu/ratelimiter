@@ -4,7 +4,7 @@ import { Counter, Rate, Trend } from 'k6/metrics';
 import crypto from 'k6/crypto';
 import encoding from 'k6/encoding';
 
-const TARGET_URL = 'http://localhost:8080/api/v1/users/me';
+const TARGET_URL = 'http://localhost:8080/api/v1/users/anything';
 
 // Must match gateway.jwt.secret in application.yml 
 const JWT_SECRET_B64 = 'bXlTdXBlclNlY3JldEtleUZvckpXVEF1dGhUaGlzSXNBVGVzdA==';
@@ -61,7 +61,7 @@ export default function (data) {
     check(res, {
         'response is 200 or 429': (r) => r.status === 200 || r.status === 429,
         '429 includes X-RateLimit-Remaining header': (r) =>
-            r.status !== 429 || r.headers['X-RateLimit-Remaining'] !== undefined,
+            r.status !== 429 || r.headers['X-Ratelimit-Remaining'] !== undefined,
     });
 
     if (ok) {
